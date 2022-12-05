@@ -5,66 +5,91 @@ def print_paper(p):
             line += p[row][col]
         print(line)
 
-def fold_paper(p, fold):
-    if fold[0] not in ['x','y']:
-        return
-    if fold[1] <= 0 or fold[1] >= len(p) - 1:
-        return
-    if fold[0] == 'x':
-        for row in range(len(p)):
-            for col in range(fold[1]+1, len(p[0])):
-                if p[row][col] != '#':
-                    continue
-                f_col = fold[1] - col - fold[1]
-                p[row][f_col] = '#'
-        for row in range(len(p)):
-            p[row] = p[row][:fold[1]]
+def parse_fold(line):
+    l = line.split(' ')
+    l = l[len(l)-1].split('=')
+    l[1] = int(l[1])
+    return l
 
-    if fold[0] == 'y':
+def fold_paper(p, axis, num):
+    if axis == 'y':
+        num_rows = num - 1
+        diff = len(p) - num - 1
+        if diff - num > 0:
+            num_rows += (diff - num)
+
+        new_paper = [['.' for col in range(len(p[0]))] for row in range(num_rows+1)]
+        for row in range(len(p)):
+            curr_row = row
+            if row == num:
+                continue
+            if row > num:
+                curr_row = num - (row - num)
+            for col in range(len(p[0])):
+                if p[row][col] == '#':
+                    new_paper[curr_row][col] = '#'
+    if axis == 'x':
+        num_cols = num - 1
+        diff = len(p[0]) - num - 1
+        if diff - num > 0:
+            num_cols += (diff - num)
+
+        new_paper = [['.' for col in range(num_cols+1)] for row in range(len(p))]
+        for row in range(len(p)):
+            for col in range(len(p[0])):
+                curr_col = col
+                if col == num:
+                    continue
+                if col > num:
+                    curr_col = num - (col - num)
+                if p[row][col] == '#':
+                    new_paper[row][curr_col] = '#'
+    return new_paper
+
+def count_dots(p):
+    count = 0
+    for row in range(len(p)):
         for col in range(len(p[0])):
-            for row in range(fold[1]+1, len(p)):
-                if p[row][col] != '#':
-                    continue
-                f_row = fold[1] - row - fold[1]
-                p[f_row][col] = '#'
-        p = p[:fold[1]]
+            if p[row][col] == '#':
+                count += 1
+    return count
 
-    
-
-f = open("sample.txt", "r")
+f = open("input.txt", "r")
 data = f.read().strip()
 data = data.replace("\r", "").split("\n")
 
-dots = []
+points = []
 folds = []
+num_rows = 0
+num_cols = 0
+
 for line in data:
-    if len(line) > 0:
-        if 'fold' in line:
-            f = line.replace('fold along ','')
-            f = f.split('=')
-            f[1] = int(f[1])
-            folds.append(f)
-        else:
-            dots.append(line.split(','))
+    if ',' in line:
+        p = line.split(',')
+        p[0] = int(p[0])
+        p[1] = int(p[1])
+        points.append(p)
+        if p[0] > num_cols:
+            num_cols = p[0]
+        if p[1] > num_rows:
+            num_rows = p[1]
+    elif '=' in line:
+        folds.append(parse_fold(line))
 
-max_x = 0
-max_y = 0
-for i in range(len(dots)):
-    dots[i][0] = int(dots[i][0])
-    dots[i][1] = int(dots[i][1])
-    if dots[i][0] > max_x:
-        max_x = dots[i][0]
-    if dots[i][1] > max_y:
-        max_y = dots[i][1]
+num_cols = num_cols + 1
+num_rows = num_rows + 1
+paper = [['.' for col in range(num_cols)] for row in range(num_rows)]
 
-paper = [['.' for x in range(max_x+1)] for y in range(max_y+1)]
-for d in dots:
-    paper[d[1]][d[0]] = '#'
+for p in points:
+    paper[p[1]][p[0]] = '#'
 
-#print(dots)
-#print(folds)
-#print("max: ({},{})".format(max_x,max_y))
 #print_paper(paper)
 
-fold_paper(paper, folds[0])
+for f in folds:
+    #print("fold: {}".format(f))
+    paper = fold_paper(paper, f[0], f[1])
+    #break #part 1
+
 print_paper(paper)
+#print("")
+#print(count_dots(paper))

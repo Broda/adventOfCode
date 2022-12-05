@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 from copy import deepcopy
+=======
+>>>>>>> cffc818a6d0d6edcf82c525932513a9734691a38
 from collections import defaultdict
 
 def printImg(img):
@@ -8,6 +11,7 @@ def printImg(img):
             line += img[row][col]
         print(line)
 
+<<<<<<< HEAD
 def enhance(img, inc):
     num_rows = len(img) + inc
     num_cols = len(img[0]) + inc
@@ -18,6 +22,17 @@ def enhance(img, inc):
     for r in range(half, num_rows-half):
         for c in range(half, num_cols-half):
             new_input[r][c] = img[r-half][c-half]
+=======
+def enhance(img):
+    num_rows = len(img) + 2
+    num_cols = len(img[0]) + 2
+    new_input = [['0' for c in range(num_cols)] for r in range(num_rows)]
+    
+    output = new_input.copy()
+    for r in range(1, num_rows-1):
+        for c in range(1, num_cols-1):
+            new_input[r][c] = img[r-1][c-1]
+>>>>>>> cffc818a6d0d6edcf82c525932513a9734691a38
     # printImg(new_input)
     # print("")
 
@@ -26,9 +41,15 @@ def enhance(img, inc):
             index = getAlgoIndex(new_input, r, c)
             output[r][c] = algo[index]
 
+<<<<<<< HEAD
     #new_output = [[output[r][c] for c in range(1, num_cols-1)] for r in range(1, num_rows-1)]
 
     return output
+=======
+    new_output = [[output[r][c] for c in range(1, num_cols-1)] for r in range(1, num_rows-1)]
+
+    return new_output
+>>>>>>> cffc818a6d0d6edcf82c525932513a9734691a38
 
 def getAlgoIndex(img, row, col):
     binNum = ''
@@ -67,16 +88,25 @@ printImg(img_input)
 print("")
 print("Lit Count: {}\n".format(getLitCount(img_input)))
 
+<<<<<<< HEAD
 img_output = enhance(img_input, 20)
+=======
+img_output = enhance(img_input)
+>>>>>>> cffc818a6d0d6edcf82c525932513a9734691a38
 printImg(img_output)
 print("")
 print("Lit Count: {}\n".format(getLitCount(img_output)))
 
+<<<<<<< HEAD
 img_output = enhance(img_output, 20)
+=======
+img_output = enhance(img_output)
+>>>>>>> cffc818a6d0d6edcf82c525932513a9734691a38
 printImg(img_output)
 print("")
 print("Lit Count: {}\n".format(getLitCount(img_output)))
 
+<<<<<<< HEAD
 output = []
 for row in range(len(img_output)-8):
     if row <= 7:
@@ -94,3 +124,7 @@ print("Lit Count: {}\n".format(getLitCount(output)))
 print("rows: {}, cols: {}".format(len(img_input), len(img_input[0])))
 print("rows: {}, cols: {}".format(len(img_output), len(img_output[0])))
 print("rows: {}, cols: {}".format(len(output), len(output[0])))
+=======
+print("rows: {}, cols: {}".format(len(img_input), len(img_input[0])))
+print("rows: {}, cols: {}".format(len(img_output), len(img_output[0])))
+>>>>>>> cffc818a6d0d6edcf82c525932513a9734691a38
