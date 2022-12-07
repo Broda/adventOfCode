@@ -24,35 +24,26 @@ def menu():
         else:
             return input("Input: ")
 
-def getNextSequence(curr):
-    next = ''
-    start = 0
-    end = 1
-    while start < len(curr):
-        c = curr[start]
-        while end < len(curr) and curr[end] == c:
-            end += 1
-        next += '{}{}'.format(end - start, c)
-        start = end
-        end += 1
-
-    return next
+def replace(m):
+    s = m.group(1)
+    return '{}{}'.format(len(s), s[0])
 
 def getAnswer(input, iterations = 1):
     input = input.replace("\r", "").split("\n")
     answer = ['',''] #part1, part2
+    reg = re.compile(r'((\d)\2*)')
+    input = str(input)
     for i in range(iterations):
-        input = getNextSequence(input)
-    answer[0] = len(input)
-    answer[1] = ''
+        input = reg.sub(replace, input)
+        if i == iterations - 11:
+            answer[0] = len(input)
+
+    #answer[0] = len(input)
+    answer[1] = len(input)
     return answer
 
 # while(True):
 #     ans = getAnswer(menu())
 #     print(ans)
-#print(getAnswer('1',5))
-# print(getAnswer('11'))
-# print(getAnswer('21'))
-# print(getAnswer('1211'))
-# print(getAnswer('111221'))
-print(getAnswer('1113222113', 40))
+
+print(getAnswer('1113222113', 50))
