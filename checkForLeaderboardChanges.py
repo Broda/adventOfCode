@@ -1,7 +1,10 @@
 import requests
 import sys
 import os
+import json
 from decouple import config
+import smtplib
+import datetime
 
 class Member:
     def __init__(self, id, name, last_star_ts, global_score, local_score, stars, completion_day_level) -> None:
@@ -48,9 +51,9 @@ class Leaderboard:
             sortedMems.append(currMem)
         return sortedMems
     
-    def print(self):
+    def toString(self):
         lines = []
-        sortedMems = board.sortedMembers()
+        sortedMems = self.sortedMembers()
         maxLine = 0
         for m in sortedMems:
             numSpaces = 2
@@ -74,7 +77,10 @@ class Leaderboard:
         s = sTitle + '\n'
         for l in lines:
             s += '{}{}\n'.format(' '*int(numSpaces),l)
-        print(s)
+        return s
+
+    def print(self):
+        print(self.toString())
 
     def getMaxMemberNameLength(self):
         currMax = 0
@@ -88,13 +94,64 @@ class Leaderboard:
             if len(str(m.local_score)) > currMax: currMax = len(str(m.local_score))
         return currMax
 
-path = 'https://adventofcode.com/2022/leaderboard/private/view/1897802.json'
-#path = 'https://www.nightfallgames.net/1897802.json'
+CARRIERS = {
+    "att": "@mms.att.net",
+    "tmobile": "@tmomail.net",
+    "verizon": "@vtext.com",
+    "sprint": "@messaging.sprintpcs.com"
+}
 
-token = config('AoC_token')
-headers = {'Cookie': 'session={}'.format(token)}
-r = requests.get(path, headers=headers)
-data = r.json()
+def send_message(number, carrier, message):
+    recip = '{}{}'.format(number, CARRIERS[carrier])
+    smtpauth = config('SMTP_Login')
 
-board = Leaderboard(**data)
-board.print()
+    server = smtplib.SMTP(config('SMTP_Server'), config('SMTP_Port'))
+    server.starttls()
+    server.login(smtpauth['Username'],smtpauth['Password'])
+
+    server.sendmail(smtpauth['Username'], recip, message)
+
+def getBoard(year=None):
+    if year is None: year = (datetime.date.today()).year
+    path = 'https://adventofcode.com/{}/leaderboard/private/view/{}.json'.format(year,config('Id'))
+
+    token = config('AoC_token')
+    headers = {'Cookie': 'session={}'.format(token)}
+    r = requests.get(path, headers=headers)
+    data = r.json()
+
+    return Leaderboard(**data)
+
+def getYears():
+    years = []
+    curr = (datetime.date.today()).year
+    for y in range(2015,curr+1):
+        years.append(str(y))
+    return years
+
+def menu():
+    main = 'Main Menu\n'
+    main += '-'*len('Main Menu')
+    main += '\n'
+    main += '1. Current Leaderboard\n'
+    main += '2. Past Leaderboard\n'
+    main += '9. Quit\n'
+
+    match input(main):
+        case "1":
+            (getBoard()).print()
+        case "2":
+            year = input("Enter year [2015-{}]:".format((datetime.date.today()).year))
+            if year not in getYears():
+                print("Invalid option. Try Again.\n")
+                return menu()
+            else:
+                (getBoard(year)).print()
+        case "9":
+            sys.exit(0)
+        case _:
+            print("Invalid option. Try Again.\n")
+            return menu()
+
+while (True):
+    menu()
