@@ -1,6 +1,64 @@
 import sys
 import os
 import re
+from copy import deepcopy
+
+class Node:
+    def __init__(self, name) -> None:
+        self.name = name
+        self.visited = False
+        self.neighbors = {}
+    
+    def __str__(self):
+        ns = ''
+        for n in self.neighbors.keys():
+            if len(ns) > 0:
+                ns += ', '
+            ns += '->{}:{}'.format(n, self.neighbors[n])
+        return '{} => {}'.format(self.name, ns)
+
+class Edge:
+    def __init__(self, edge) -> None:
+        aSplit = edge.split(' ')
+        a = aSplit[0]
+        b = aSplit[2]
+        c = aSplit[4]
+        self.id = a + "->" + b
+        self.cost = int(c)
+    
+    def __str__(self):
+        return "{}: {}".format(self.id,self.cost)
+
+class Graph:
+    def __init__(self, edges) -> None:
+        self.nodes = {}
+        self.edges = []
+        for e in edges:
+            self.edges.append(Edge(e))
+        for e in self.edges:
+            a, b = e.id.split('->')
+            if a not in self.nodes.keys():
+                self.nodes[a] = Node(a)
+            if b not in self.nodes.keys():
+                self.nodes[b] = Node(b)
+            self.nodes[a].neighbors[b] = e.cost
+            self.nodes[b].neighbors[a] = e.cost
+        
+    
+    def __str__(self):
+        nodes = ''
+        edges = ''
+        for e in self.edges:
+            if len(edges) > 0:
+                edges += ", "
+            edges += "{}".format(e)
+        
+        for n in self.nodes.keys():
+            if len(nodes) > 0:
+                nodes += ", "
+            nodes += "{}".format(self.nodes[n])
+        s = "Nodes:\n{}\nEdges:\n{}\n".format(nodes, edges)
+        return s
 
 def readFile(path):
     f = open(path, "r")
@@ -24,53 +82,18 @@ def menu():
         else:
             return input("Input: ")
 
-class Node:
-    def __init__(self, name) -> None:
-        self.name = name
-        self.neighbors = {}
-
-    def __str__(self) -> str:
-        return self.name
-    
-class Edge:
-    def __init__(self, startNodeName, endNodeName, cost) -> None:
-        self.id = '{}->{}'.format(startNodeName, endNodeName)
-        self.startNodeName = startNodeName
-        self.endNodeName = endNodeName
-        self.cost = cost
-    
-    def __str__(self) -> str:
-        return self.id + ': {}'.format(self.cost)
-
-class Graph:
-    def __init__(self, dataArray) -> None:
-        self.dataArray = dataArray
-        self.nodes = {}
-        self.edges = {}
-
-    def getNodesString(self):
-        s = ''
-        for n in self.nodes:
-            if len(s) > 0: s += ', '
-            s += str(n)
-        return s
-
-    def getEdgesString(self):
-        s = ''
-        for e in self.edges:
-            if len(s) > 0: s += ', '
-            s += str(e)
-        return s
-
-    def __str__(self) -> str:
-        return ''
-
 def getAnswer(input):
-    input = input.replace("\r", "").split("\n")
     answer = [0,0] #part1, part2
-    for l in input:
-        answer[0] += 0
-        answer[1] += 0
+
+    input = input.replace("\r", "").split("\n")
+    # input format:
+    # PlaceA to PlaceB = 464
+    # PlaceA to PlaceC = 518
+    # PlaceB to PlaceC = 141
+
+    g = Graph(input)
+    print(g)
+
     return answer
 
 while(True):
