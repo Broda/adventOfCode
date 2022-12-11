@@ -1,34 +1,5 @@
-import sys
 import os
-import re
-from functools import lru_cache
-
-#sys.set_int_max_str_digits(sys.get_int_max_str_digits()*3)
-
-def readFile(path):
-    if not os.getcwd().endswith('2022'): os.chdir('2022')
-    f = open(path, "r")
-    return f.read().strip()
-
-def printGrid(g, rev=False):
-    if rev:
-        for r in reversed(g):
-            print(''.join(r))
-    else:
-        for r in g:
-            print(''.join(r))
-
-def addVector(a, b):
-    v = []
-    for i in range(len(a)):
-        v.append(a[i] + b[i])
-    return v
-
-def subVector(a, b):
-    v = []
-    for i in range(len(a)):
-        v.append(a[i] - b[i])
-    return v
+import sys
 
 def menu():
     main = "\nPlease choose an input option:\n"
@@ -57,6 +28,11 @@ def menu():
         case _:
             print("Invalid option. Try Again.\n")
             return menu()
+
+def readFile(path):
+    if not os.getcwd().endswith('2022'): os.chdir('2022')
+    f = open(path, "r")
+    return f.read().strip()
 
 class Monkey():
     def __init__(self, input, printSteps = False) -> None:
