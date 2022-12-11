@@ -30,7 +30,7 @@ def subVector(a, b):
         v.append(a[i] - b[i])
     return v
 
-def menu(samplePath, inputPath):
+def menu():
     main = "\nPlease choose an input option:\n"
     main += "1. Sample File\n"
     main += "2. Input File\n"
@@ -38,6 +38,10 @@ def menu(samplePath, inputPath):
     main += "4. Prompt\n"
     main += "5. Quit\n"
     main += ">> "
+    
+    filename = os.path.basename(__file__)
+    samplePath = filename.replace('.py', 'sample.txt')
+    inputPath = filename.replace('.py', 'input.txt')
     
     match input(main):
         case "5":
@@ -161,5 +165,5 @@ def getAnswer(input):
     return answer
 
 while(True):
-    ans = getAnswer(menu('day11sample.txt','day11input.txt'))
+    ans = getAnswer(menu())
     print('\nanswer: {}'.format(ans))
