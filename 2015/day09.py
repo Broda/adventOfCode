@@ -1,71 +1,13 @@
 import sys
 import os
-import re
-from copy import deepcopy
-
-class Node:
-    def __init__(self, name) -> None:
-        self.name = name
-        self.visited = False
-        self.neighbors = {}
-    
-    def __str__(self):
-        ns = ''
-        for n in self.neighbors.keys():
-            if len(ns) > 0:
-                ns += '\n\t\t-> '
-            ns += '{}:{}'.format(n, self.neighbors[n])
-        return '{}\t-> {}'.format(self.name, ns)
-
-class Edge:
-    def __init__(self, edge) -> None:
-        aSplit = edge.split(' ')
-        a = aSplit[0]
-        b = aSplit[2]
-        c = aSplit[4]
-        self.id = a + "<->" + b
-        self.cost = int(c)
-    
-    def __str__(self):
-        return "{}: {}".format(self.id,self.cost)
-
-class Graph:
-    def __init__(self, edges) -> None:
-        self.nodes = {}
-        self.edges = []
-        for e in edges:
-            self.edges.append(Edge(e))
-        for e in self.edges:
-            a, b = e.id.split('<->')
-            if a not in self.nodes.keys():
-                self.nodes[a] = Node(a)
-            if b not in self.nodes.keys():
-                self.nodes[b] = Node(b)
-            self.nodes[a].neighbors[b] = e.cost
-            self.nodes[b].neighbors[a] = e.cost
-        
-    def __str__(self):
-        nodes = ''
-        edges = ''
-        for e in self.edges:
-            if len(edges) > 0:
-                edges += "\n"
-            edges += "\t{}".format(e)
-        
-        for n in self.nodes.keys():
-            if len(nodes) > 0:
-                nodes += "\n"
-            nodes += "\t{}".format(self.nodes[n])
-        s = "Nodes:\n{}\nEdges:\n{}\n".format(nodes, edges)
-        return s
-
+from itertools import permutations
 
 def readFile(path):
     if not os.getcwd().endswith('2015'): os.chdir('2015')
     f = open(path, "r")
     return f.read().strip()
 
-def menu(samplePath, inputPath):
+def menu():
     main = "\nPlease choose an input option:\n"
     main += "1. Sample File\n"
     main += "2. Input File\n"
@@ -73,6 +15,10 @@ def menu(samplePath, inputPath):
     main += "4. Prompt\n"
     main += "5. Quit\n"
     main += ">> "
+    
+    filename = os.path.basename(__file__)
+    samplePath = filename.replace('.py', 'sample.txt')
+    inputPath = filename.replace('.py', 'input.txt')
     
     match input(main):
         case "5":
@@ -89,21 +35,6 @@ def menu(samplePath, inputPath):
             print("Invalid option. Try Again.\n")
             return menu()
 
-def findPath(g, n1, n2):
-    p = [n1]
-
-    for n in g.nodes[n1].neighbors.keys():
-        if n == n2:
-            p.append(n2)
-            return p
-    
-    neighbors = list(g.nodes[n1].neighbors.keys())
-    for n in g.nodes[n1].neighbors.keys():
-        if n not in p:
-            p = findPath(g, n, n2)
-        
-    
-
 def getAnswer(input):
     answer = [0,0] #part1, part2
 
@@ -113,15 +44,27 @@ def getAnswer(input):
     # PlaceA to PlaceC = 518
     # PlaceB to PlaceC = 141
 
-    g = Graph(input)
-    print(g)
-    print()
-    keys = list(g.nodes.keys())
-    p, pCost = findPath(g, keys[0], keys[1])
-    print(p, pCost)
-
+    places = set()
+    distances = dict()
+    for l in input:
+        (source, _, dest, _, distance) = l.split()
+        places.add(source)
+        places.add(dest)
+        distances.setdefault(source, dict())[dest] = int(distance)
+        distances.setdefault(dest, dict())[source] = int(distance)
+    
+    shortest = sys.maxsize
+    longest = 0
+    for items in permutations(places):
+        dist = sum(map(lambda x, y: distances[x][y], items[:-1], items[1:]))
+        shortest = min(shortest, dist)
+        longest = max(longest, dist)
+    
+    answer[0] = shortest
+    answer[1] = longest
+    
     return answer
 
 while(True):
-    ans = getAnswer(menu('day09sample.txt','day09input.txt'))
+    ans = getAnswer(menu())
     print('\nanswer: {}'.format(ans))
