@@ -1,5 +1,6 @@
 import os
 import sys
+import collections
 
 def menu():
     main = "\nPlease choose an input option:\n"
@@ -34,43 +35,41 @@ def readFile(path):
     f = open(path, "r")
     return f.read().strip()
 
-def printGrid(g, rev=False):
-    if rev:
-        for r in reversed(g):
-            print(''.join(r))
-    else:
-        for r in g:
-            print(''.join(str(r)))
+def bfs(grid, *start):
+    
+    q = collections.deque((row, col, 0, 'a') for row in range(len(grid))
+        for col in range(len(grid[0]))
+        if grid[row][col] in start)
 
-def findCell(grid, letter):
-    for r in range(len(grid)):
-        for c in range(len(grid[0])):
-            if grid[r][c] == letter: return [r,c]
-    return None
+    visited = set((row, col) for row, col, count, char in q)
 
-def calcManhatten(grid, start, end):
-    m = []
-    for r in range(len(grid)):
-        row = []
-        for c in range(len(grid[0])):
-            row.append(abs(end[0] - r) + abs(end[1] - c))
-        m.append(row)
-    return m
+    def push(row, col, count, curr):
+        if not (0 <= row < len(grid)) or not (0 <= col < len(grid[0])): return
+        if (row, col) in visited: return
+
+        next = grid[row][col].replace('E', 'z') # replace E if we're checking the end
+        if ord(next) > ord(curr) + 1: return
+        
+        visited.add((row, col))
+        q.append((row, col, count + 1, next))
+
+    while len(q):
+        row, col, count, char = q.popleft()
+        if grid[row][col] == 'E': return count
+        
+        push(row + 1, col, count, char)
+        push(row - 1, col, count, char)
+        push(row, col + 1, count, char)
+        push(row, col - 1, count, char)
 
 def getAnswer(input):
     input = input.replace("\r", "").split("\n")
     answer = [0,0] #part1, part2
     
     grid = list(map(list, input))
-    start = findCell(grid, 'S')
-    end = findCell(grid, 'E')
-
-    manhatten = calcManhatten(grid, start, end)
     
-    
-
-    answer[0] = 0
-    answer[1] = 0
+    answer[0] = bfs(grid, 'S')
+    answer[1] = bfs(grid, 'a')
 
     return answer
 
