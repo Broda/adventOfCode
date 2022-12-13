@@ -1,4 +1,5 @@
 import heapq
+import collections
 
 def dijkstra(graph, start_node, end_node):
     best = [float('+Inf')] * len(graph)
@@ -26,6 +27,35 @@ graph = [
 print(dijkstra(graph, 0, 3))
 print(dijkstra(graph, 0, 2))
 print(dijkstra(graph, 0, 1))
+
+
+def bfs(grid, *start):
+    
+    q = collections.deque((row, col, 0, 'a') for row in range(len(grid))
+        for col in range(len(grid[0]))
+        if grid[row][col] in start)
+
+    visited = set((row, col) for row, col, count, char in q)
+
+    def push(row, col, count, curr):
+        if not (0 <= row < len(grid)) or not (0 <= col < len(grid[0])): return
+        if (row, col) in visited: return
+
+        next = grid[row][col].replace('E', 'z') # replace E if we're checking the end
+        if ord(next) > ord(curr) + 1: return
+        
+        visited.add((row, col))
+        q.append((row, col, count + 1, next))
+
+    while len(q):
+        row, col, count, char = q.popleft()
+        if grid[row][col] == 'E': return count
+        
+        push(row + 1, col, count, char)
+        push(row - 1, col, count, char)
+        push(row, col + 1, count, char)
+        push(row, col - 1, count, char)
+
 
 def calcManhatten(grid, end):
     m = []
