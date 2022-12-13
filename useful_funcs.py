@@ -1,3 +1,4 @@
+import sys
 import heapq
 import collections
 
@@ -24,10 +25,9 @@ graph = [
     [(2, 1)],
 ]
 
-print(dijkstra(graph, 0, 3))
-print(dijkstra(graph, 0, 2))
-print(dijkstra(graph, 0, 1))
-
+# print(dijkstra(graph, 0, 3))
+# print(dijkstra(graph, 0, 2))
+# print(dijkstra(graph, 0, 1))
 
 def bfs(grid, *start):
     
@@ -56,6 +56,41 @@ def bfs(grid, *start):
         push(row, col + 1, count, char)
         push(row, col - 1, count, char)
 
+def prim():
+    print('=== Prim ===')
+    grid = [[ 0, 19,  5,  0,  0],
+            [19,  0,  5,  9,  2],
+            [ 5,  5,  0,  1,  6],
+            [ 0,  9,  1,  0,  1],
+            [ 0,  2,  6,  1,  0]]
+    for r in grid:
+        print(r)
+
+    N = len(grid)
+
+    sel_node = [False]*N
+    no_edge = 0
+    sel_node[0] = True
+
+    print('Edge : Weight')
+    while no_edge < N - 1:
+        minimum = sys.maxsize
+        a = 0
+        b = 0
+        for m in range(N):
+            if sel_node[m]:
+                for n in range(N):
+                    if not sel_node[n] and grid[m][n]:
+                        # not in sel and there is an edge
+                        if minimum > grid[m][n]:
+                            minimum = grid[m][n]
+                            a = m
+                            b = n
+        print('{}-{}:{}'.format(a, b, grid[a][b]))
+        sel_node[b] = True
+        no_edge += 1
+
+prim()
 
 def calcManhatten(grid, end):
     m = []
@@ -79,7 +114,6 @@ def printGrid(g, rev=False):
     else:
         for r in g:
             print(''.join(str(r)))
-
 
 class Node:
     def __init__(self, name) -> None:
