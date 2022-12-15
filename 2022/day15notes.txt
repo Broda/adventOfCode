@@ -1,0 +1,24 @@
+whereever dist crosses line, left and right are symmetrical (equal size)
+slope is always 45deg
+2 * (dist - abs(sensor_y - line_y)) + 1 = num blocked spots
+if num blocked spots < 0, num blocked spots = 0
+
+
+if line_y == 1000 and sensor_y == 985 and dist == 20
+    blocked_spots = 2*(20 - abs(985 - 1000)) + 1 = 2(20 - 15) + 1 = 2 * 5 + 1 = 11
+
+if line_y == 1000 and sensor_y == 985 and dist == 10
+    blocked_spots = 2*(10 - abs(985-1000)) + 1 = 2(10 - 15) + 1 = 2 * -5 + 1 = -10 + 1 = -9 => 0
+
+if line_y == 1000 and sensor_y == 1010 and dist == 20
+    blocked_spots = 2*(20 - abs(1010-1000)) + 1 = 2(20 - 10) + 1 = 2 * 10 + 1 = 21
+
+if line_y == 1000 and sensor_y == 985 and dist == 15
+    blocked_spots = 2*(15 - abs(985-1000)) + 1 = 2(15-15) + 1 = 1
+
+
+
+
+
+if line_y == 998 and sensor_y == 985 and dist == 20
+    blocked_spots = 2*(20 - abs(998 - 985)) + 1 = 2*(20-13) + 1 = 2*7 + 1 = 15
