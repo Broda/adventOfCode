@@ -1,5 +1,6 @@
 import os
 import sys
+from copy import deepcopy
 
 def menu():
     main = "\nPlease choose an input option:\n"
@@ -30,85 +31,15 @@ def menu():
             print("Invalid option. Try Again.\n")
             return menu()
 
+def readFile(path):
+    if not os.getcwd().endswith('2022'): os.chdir('2022')
+    f = open(path, "r")
+    return f.read().strip()
+
+
 def calcManhatten(start, end):
     return abs(end[0] - start[0]) + abs(end[1] - start[1])
 
-# def tryUpdateStartStop(newPos, start, stop):
-#     start[0] = min(start[0], newPos[0])
-#     start[1] = min(start[1], newPos[1])
-#     stop[0] = max(stop[0], newPos[0])
-#     stop[1] = max(stop[1], newPos[1])
-#     return start, stop
-
-# def markSensorRange(grid, sensor, beacon, start, stop):
-#     dist = calcManhatten(sensor, beacon)
-#     x_mod = 0
-#     for y in range(sensor[1]-dist, sensor[1]+dist+1):
-#         for x in range(sensor[0]-x_mod, sensor[0]+x_mod+1):
-#             if (x, y) not in grid.keys():
-#                 #print('adding ({},{})'.format(x, y))
-#                 grid[(x, y)] = '#'
-#             elif grid[(x, y)] == '.':
-#                 grid[(x, y)] = '#'
-#             start, stop = tryUpdateStartStop((x, y), start, stop)
-#         if y >= sensor[1]:
-#             x_mod -= 1
-#         else:
-#             x_mod += 1
-
-#     return grid, start, stop
-
-# def countBlockedSpotsInRow(grid, y, start, stop):
-#     count = 0
-#     for x in range(start[0], stop[0]+1):
-#         if (x, y) in grid.keys():
-#             if grid[(x, y)] == '#': 
-#                 count += 1
-#         #     else:
-#         #         print('({},{}) = "{}"'.format(x, y, grid[(x, y)]))
-#         # else:
-#         #     print('({},{}) not in grid'.format(x, y))
-
-#     return count
-
-# def buildGrid(input):
-#     g = {}
-#     start = [sys.maxsize, sys.maxsize]
-#     stop = [-sys.maxsize, -sys.maxsize]
-#     for l in input:
-#         _, _, sx, sy, _, _, _, _, bx, by = l.split()
-#         # print('sx="{}", sy="{}"'.format(sx, sy))
-#         sx = int(sx.split('=')[1][:-1])
-#         sy = int(sy.split('=')[1][:-1])
-#         # print('sx="{}", sy="{}"'.format(sx, sy))
-#         # print('bx="{}", by="{}"'.format(bx, by))
-#         bx = int(bx.split('=')[1][:-1])
-#         by = int(by.split('=')[1])
-#         # print('bx="{}", by="{}"'.format(bx, by))
-#         g[(sx, sy)] = 'S'
-#         start, stop = tryUpdateStartStop((sx, sy),start, stop)
-        
-#         g[(bx, by)] = 'B'
-#         start, stop = tryUpdateStartStop((bx, by),start, stop)
-        
-#         g, start, stop = markSensorRange(g, (sx, sy), (bx, by), start, stop)
-
-#     return g, start, stop
-
-
-# def printGrid(grid, start, stop):
-#     print_grid_str = ''
-#     for y in range(start[1],stop[1]+1):
-#         r = ''
-#         for x in range(start[0], stop[0]+1):
-#             if (x, y) in grid.keys():
-#                 r += grid[(x,y)]
-#             else:
-#                 r += '.'
-
-#         print_grid_str += r + '\n'
-
-#     print(print_grid_str)
 
 def buildGrid(input):
     g = {}
@@ -123,39 +54,68 @@ def buildGrid(input):
     return g
 
 def countBlockedSpotsInRow(grid, y):
-    #2 * (dist - abs(sensor_y - line_y)) + 1 = num blocked spots
-    #if num blocked spots < 0, num blocked spots = 0
     count = 0
+    spots = {}
     for k, p in grid.items():
+        # k = (x, y), p[0] = 'S', p[1] = manhatten dist
         if type(p) is tuple:
-            spots = 2 * (p[1] - abs(k[1] - y))
-            if spots > 0: count += spots + 1
+            diff = abs(k[1] - y)
+            if diff > p[1]:
+                continue
+            
+            x_diff = p[1] - diff
+                        
+            for x in range(k[0]-x_diff, k[0] + x_diff+1):
+                if (x, y) in grid.keys():
+                    spots[(x,y)] = grid[(x,y)]
+
+                if (x,y) not in spots.keys():
+                    count += 1
+                    spots[(x,y)] = '#'
+
         elif k[1] == y:
-            count -= 1 # remove any B on line
+            spots[k] = 'B'
 
     return count
 
-def readFile(path):
-    if not os.getcwd().endswith('2022'): os.chdir('2022')
-    f = open(path, "r")
-    return f.read().strip()
+def markSensorRange(grid):
+    init_grid = deepcopy(grid)
+
+    for k, p in init_grid.items():
+        if type(p) is tuple:
+            x_mod = 0
+            for y in range(k[1]-p[1], k[1]+p[1]+1):
+                for x in range(k[0]-x_mod, k[0]+x_mod+1):
+                    if (x, y) not in grid.keys():
+                        grid[(x, y)] = '#'
+
+                if y >= k[1]:
+                    x_mod -= 1
+                else:
+                    x_mod += 1
+
+    return grid
+
+def findBeacon(grid):
+    grid = markSensorRange(grid)
+
+    for y in range(4000001):
+        for x in range(4000001):
+            if (x,y) not in grid.keys():
+                return x * 4000000 + y
 
 def getAnswer(input, isSample):
     input = input.replace("\r", "").split("\n")
     answer = [0,0] #part1, part2
 
-    #grid, start, stop = buildGrid(input)
-    #printGrid(grid, start, stop)
     grid = buildGrid(input)
 
-    # if isSample:
-    #     answer[0] = countBlockedSpotsInRow(grid, 10, start, stop)
-    # else:
-    #     answer[0] = countBlockedSpotsInRow(grid, 2000000, start, stop)
     if isSample:
         answer[0] = countBlockedSpotsInRow(grid, 10)
+        answer[1] = findBeacon(grid)
     else:
         answer[0] = countBlockedSpotsInRow(grid, 2000000)
+
     return answer
 
 while(True):

@@ -22,3 +22,82 @@ if line_y == 1000 and sensor_y == 985 and dist == 15
 
 if line_y == 998 and sensor_y == 985 and dist == 20
     blocked_spots = 2*(20 - abs(998 - 985)) + 1 = 2*(20-13) + 1 = 2*7 + 1 = 15
+
+
+
+# def tryUpdateStartStop(newPos, start, stop):
+#     start[0] = min(start[0], newPos[0])
+#     start[1] = min(start[1], newPos[1])
+#     stop[0] = max(stop[0], newPos[0])
+#     stop[1] = max(stop[1], newPos[1])
+#     return start, stop
+
+# def markSensorRange(grid, sensor, beacon, start, stop):
+#     dist = calcManhatten(sensor, beacon)
+#     x_mod = 0
+#     for y in range(sensor[1]-dist, sensor[1]+dist+1):
+#         for x in range(sensor[0]-x_mod, sensor[0]+x_mod+1):
+#             if (x, y) not in grid.keys():
+#                 #print('adding ({},{})'.format(x, y))
+#                 grid[(x, y)] = '#'
+#             elif grid[(x, y)] == '.':
+#                 grid[(x, y)] = '#'
+#             start, stop = tryUpdateStartStop((x, y), start, stop)
+#         if y >= sensor[1]:
+#             x_mod -= 1
+#         else:
+#             x_mod += 1
+
+#     return grid, start, stop
+
+# def countBlockedSpotsInRow(grid, y, start, stop):
+#     count = 0
+#     for x in range(start[0], stop[0]+1):
+#         if (x, y) in grid.keys():
+#             if grid[(x, y)] == '#': 
+#                 count += 1
+#         #     else:
+#         #         print('({},{}) = "{}"'.format(x, y, grid[(x, y)]))
+#         # else:
+#         #     print('({},{}) not in grid'.format(x, y))
+
+#     return count
+
+# def buildGrid(input):
+#     g = {}
+#     start = [sys.maxsize, sys.maxsize]
+#     stop = [-sys.maxsize, -sys.maxsize]
+#     for l in input:
+#         _, _, sx, sy, _, _, _, _, bx, by = l.split()
+#         # print('sx="{}", sy="{}"'.format(sx, sy))
+#         sx = int(sx.split('=')[1][:-1])
+#         sy = int(sy.split('=')[1][:-1])
+#         # print('sx="{}", sy="{}"'.format(sx, sy))
+#         # print('bx="{}", by="{}"'.format(bx, by))
+#         bx = int(bx.split('=')[1][:-1])
+#         by = int(by.split('=')[1])
+#         # print('bx="{}", by="{}"'.format(bx, by))
+#         g[(sx, sy)] = 'S'
+#         start, stop = tryUpdateStartStop((sx, sy),start, stop)
+        
+#         g[(bx, by)] = 'B'
+#         start, stop = tryUpdateStartStop((bx, by),start, stop)
+        
+#         g, start, stop = markSensorRange(g, (sx, sy), (bx, by), start, stop)
+
+#     return g, start, stop
+
+
+# def printGrid(grid, start, stop):
+#     print_grid_str = ''
+#     for y in range(start[1],stop[1]+1):
+#         r = ''
+#         for x in range(start[0], stop[0]+1):
+#             if (x, y) in grid.keys():
+#                 r += grid[(x,y)]
+#             else:
+#                 r += '.'
+
+#         print_grid_str += r + '\n'
+
+#     print(print_grid_str)
