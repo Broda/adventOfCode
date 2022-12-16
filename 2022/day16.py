@@ -54,23 +54,42 @@ def buildGraph(input):
 
     return g
 
-visitedList = [[]]
+# visitedList = [[]]
 
-def depthFirst(graph, currNode, visited):
-    visited.append(currNode)
-    for node in graph[currNode].valves:
-        if node not in visited:
-            depthFirst(graph, node, visited.copy())
-    visitedList.append(visited)
+# def depthFirst(graph, currNode, visited):
+#     visited.append(currNode)
+#     for node in graph[currNode].valves:
+#         if node not in visited:
+#             depthFirst(graph, node, visited.copy())
+#     visitedList.append(visited)
+
+
+def floid_warshall(graph):
+    dist = {v: {u: sys.maxsize for u in graph.keys()} for v in graph.keys()}
+ 
+    keys = graph.keys()
+    for v in keys:
+        dist[v][v] = 0
+        for u in graph[v].valves:
+            dist[v][u] = 1
+ 
+    for k in keys:
+        for i in keys:
+            for j in keys:
+                dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+ 
+    return dist
+
 
 def getAnswer(input, isSample):
     input = input.replace("\r", "").split("\n")
     answer = [0,0] #part1, part2
 
     g = buildGraph(input)
-    depthFirst(g, 'AA', [])
+    # depthFirst(g, 'AA', [])
     #print(visitedList)
-
+    dist = floid_warshall(g)
+    print(dist)
     
 
     return answer
