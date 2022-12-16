@@ -29,6 +29,18 @@ graph = [
 # print(dijkstra(graph, 0, 2))
 # print(dijkstra(graph, 0, 1))
 
+visitedList = [[]]
+
+def depthFirst(graph, currNode, visited):
+    visited.append(currNode)
+    for node in graph[currNode]:
+        if node not in visited:
+            depthFirst(graph, node, visited.copy())
+    visitedList.append(visited)
+
+depthFirst(graph, 0, [])
+print(visitedList)
+
 def bfs(grid, *start):
     
     q = collections.deque((row, col, 0, 'a') for row in range(len(grid))
