@@ -29,6 +29,21 @@ graph = [
 # print(dijkstra(graph, 0, 2))
 # print(dijkstra(graph, 0, 1))
 
+def floid_warshall(valves):
+    dist = {v: {u: sys.maxsize for u in valves} for v in valves}
+ 
+    for v in valves:
+        dist[v][v] = 0
+        for u in valves[v].children:
+            dist[v][u] = 1
+ 
+    for k in valves:
+        for i in valves:
+            for j in valves:
+                dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+ 
+    return dist
+
 visitedList = [[]]
 
 def depthFirst(graph, currNode, visited):
