@@ -111,6 +111,7 @@ class Elf:
                     return tupleAdd(self.loc, (1,0))
                 case _:
                     return move
+        return move
     
 def buildGrid(input) -> tuple[dict, list, list]:
     grid = {}
@@ -167,6 +168,7 @@ def getAnswer(input, isSample) -> list:
 
         # step 3: update direction decisions
         for k, e in elves.items():
+            e.updateNeighbors()
             e.updateDirection()
 
         round += 1
