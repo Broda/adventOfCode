@@ -1,5 +1,6 @@
 import os
 import sys
+from statistics import variance
 
 def menu():
     main = "\nPlease choose an input option:\n"
@@ -43,13 +44,21 @@ def writeFile(path, s):
 
 class Robot:
     def __init__(self, pvStr : str):
+        self.init = pvStr
         self.pos = [int(p) for p in pvStr.split(" ")[0].split("=")[1].split(",")]
         self.vel = [int(p) for p in pvStr.split(" ")[1].split("=")[1].split(",")]
+    
+    def reset(self):
+        self.pos = [int(p) for p in self.init.split(" ")[0].split("=")[1].split(",")]
+        self.vel = [int(p) for p in self.init.split(" ")[1].split("=")[1].split(",")]
     
     def move(self, boardSize : tuple, times : int):
         self.pos[0] = (self.pos[0] + self.vel[0] * times) % boardSize[0]
         self.pos[1] = (self.pos[1] + self.vel[1] * times) % boardSize[1]
 
+    def sim(self, boardSize : tuple, times : int):
+        return ((self.pos[0] + self.vel[0] * times) % boardSize[0], (self.pos[1] + self.vel[1] * times) % boardSize[1])
+    
     def __repr__(self) -> str:
         return f"p={self.pos}, v={self.vel}"
     
@@ -97,7 +106,23 @@ def getPart1(robots : list, isSample : bool = False) -> int:
     return q1 * q2 * q3 * q4
 
 def getPart2(robots : list) -> int:
-    return 0
+    boardSize = (101, 103)
+
+    minVar = [10000,10000]
+    x, y = 0, 0
+    for it in (range(max(boardSize[0],boardSize[1]))):
+        robot_locs = [r.sim(boardSize, it) for r in robots]
+        robot_xs, robot_ys = zip(*robot_locs)
+        xvar = variance(robot_xs)
+        yvar = variance(robot_ys)
+        if xvar < minVar[0]:
+            minVar[0] = xvar
+            x = it
+        if yvar < minVar[1]:
+            minVar[1] = yvar
+            y = it
+    # Chinese Remainder Theorem
+    return x+((pow(boardSize[0], -1, boardSize[1])*(y-x)) % boardSize[1])*boardSize[0]
 
 def loadRobots(input : list) -> list:
     #p=0,4 v=3,-3
