@@ -55,7 +55,7 @@ class Robot:
     
 def countRobots(robots : list, boardMin : tuple, boardMax : tuple) -> int:
     num = 0
-    print(f"counting robots between {boardMin} and {boardMax}")
+    
     for r in robots:
         if r.pos[0] >= boardMin[0] and r.pos[0] < boardMax[0] and r.pos[1] >= boardMin[1] and r.pos[1] < boardMax[1]:
             num += 1
@@ -87,15 +87,12 @@ def getPart1(robots : list, isSample : bool = False) -> int:
     for r in robots:
         r.move(boardSize, 100)
     
-    printBoard(boardSize, robots)
-    
     mid = (boardSize[0]//2, boardSize[1]//2)
-    print(f"mid = {mid}, boardSize = {boardSize}")
-    q1 = countRobots(robots, (0, 0), (mid[0]+1, mid[1]))
+    
+    q1 = countRobots(robots, (0, 0), (mid[0], mid[1]))
     q2 = countRobots(robots, (mid[0]+1, 0), (boardSize[0], mid[1]))
     q3 = countRobots(robots, (0, mid[1]+1), (mid[0], boardSize[1]))
     q4 = countRobots(robots, (mid[0]+1, mid[1]+1), (boardSize[0], boardSize[1]))
-    print(q1, q2, q3, q4)
     
     return q1 * q2 * q3 * q4
 
@@ -112,7 +109,6 @@ def loadRobots(input : list) -> list:
 def getAnswer(input, isSample) -> list:
     input = input.replace("\r", "").split("\n")
     answer = [0,0] #part1, part2
-
 
     answer[0] = getPart1(loadRobots(input), isSample)
     answer[1] = getPart2(loadRobots(input))
