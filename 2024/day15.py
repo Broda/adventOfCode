@@ -41,7 +41,7 @@ def writeFile(path, s):
     f.write(s)
     f.close()
 
-MoveDict = {"<":(-1,0),">":(1,0),"^":(0,-1),"v":(0,1)}
+MoveDict = {"<":(0,-1),">":(0,1),"^":(-1,0),"v":(1,0)}
 
 def addTupleToPosInPlace(pos : list, _tuple : tuple) -> None:
     pos[0] += _tuple[0]
@@ -50,6 +50,18 @@ def addTupleToPosInPlace(pos : list, _tuple : tuple) -> None:
 def addTupleToPos(pos : list, _tuple : tuple) -> list:
     return [pos[0] + _tuple[0], pos[1] + _tuple[1]]
 
+def posInBounds(_map : list, _pos : list) -> bool:
+    if _pos[0] < 0 or _pos[0] >= len(_map) or _pos[1] < 0 or _pos[1] >= len(_map[0]): return False
+    return True
+
+def getMapItemFromPos(_map : list, _pos : list) -> str:
+    if _pos[0] < 0 or _pos[0] >= len(_map) or _pos[1] < 0 or _pos[1] >= len(_map[0]): return "#"
+    return _map[_pos[0]][_pos[1]]
+
+def setMapItem(_map : list, _pos : list, _item : str):
+    if posInBounds(_map, _pos):
+        _map[_pos[0]][_pos[1]] = _item
+        
 def printMap(_map : list) -> None:
     for r in range(len(_map)):
         row = ""
@@ -61,56 +73,80 @@ def getRobotPos(_map : list) -> list:
     for r in range(1,len(_map)-1):
         for c in range(1, len(_map[0])-1):
             if _map[r][c] == "@":
-                return [c, r] # positions are [x, y]
+                return [r, c]
             
 def tryMove(_robot : list, _map : list, _move : tuple) -> bool:
-    startPos = _robot
+    currPos = _robot
 
-    while True:
-        nextSpotPos = addTupleToPos(_robot, _move)
-        nextSpot = _map[nextSpotPos[1]][nextSpotPos[0]]
-        if nextSpot != "O":
+    moveList = []
+    while (item := getMapItemFromPos(_map, (currPos := addTupleToPos(currPos, _move)))) != "#":
+        if item == ".":
+            moveList.append(_robot)
             break
-    
-    if nextSpot == "#":
-        return False
-
-    # nextSpot must be a .
-    revMove = (-1 * _move[0], -1 * _move[1])
-    while True:
-        _map[nextSpotPos[1]][nextSpotPos[0]] = _map[nextSpotPos[1] + revMove[1]][nextSpotPos[0] + revMove[0]]
-        if _map[nextSpotPos[1]][nextSpotPos[0]] == "@":
-            _robot = nextSpotPos
-        addTupleToPosInPlace(nextSpotPos, revMove)
-        if nextSpotPos[0] == startPos[0] and nextSpotPos[1] == startPos[1]:
-            _map[nextSpotPos[1]][nextSpotPos[0]] = "."
-            break
-
-    return True
+        moveList.append(currPos) # add item to move list
+        
+    if len(moveList) > 0:
+        for i in range(len(moveList)):
+            moveTo = addTupleToPos(moveList[i], _move)
+            if getMapItemFromPos(_map, moveTo) == "#":
+                return False
+            setMapItem(_map, moveTo, getMapItemFromPos(_map, moveList[i]))
+        setMapItem(_map, _robot, ".")
+        return True
+    return False # didn't move
 
 def calcCoord(_box : tuple) -> int:
-    return _box[1] * 100 + _box[0]
+    return _box[0] * 100 + _box[1]
 
 def getPart1(_map : list, _moves : str) -> int:
     for r in range(len(_map)):
         _map[r] = list(_map[r]) # change strings to lists so they can be modified in place
 
-    printMap(_map)
     robot = getRobotPos(_map)
     for m in _moves:
         print(f"Move: {m}")
-        tryMove(robot, _map, MoveDict[m])
-        printMap(_map)
+        if tryMove(robot, _map, MoveDict[m]):
+            robot = addTupleToPos(robot, MoveDict[m])
     
     sum = 0
     for r in range(1, len(_map)):
         for c in range(1, len(_map[0])):
             if _map[r][c] == "O":
-                sum += calcCoord((c, r))
+                sum += calcCoord((r, c))
     return sum
 
-def getPart2() -> int:
-    return 0
+def resizeMap(input : list) -> list:
+    newMap = []
+    for r in input:
+        row = ""
+        for c in r:
+            match c:
+                case "#":
+                    row += "##"
+                case ".":
+                    row += ".."
+                case "O":
+                    row += "[]"
+                case "@":
+                    row += "@."
+        newMap.append(list(row))
+    return newMap
+            
+def getPart2(input : list, _moves : str) -> int:
+    _map = resizeMap(input)
+    
+    robot = getRobotPos(_map)
+    # for m in _moves:
+    #     print(f"Move: {m}")
+    #     if tryMove(robot, _map, MoveDict[m]):
+    #         robot = addTupleToPos(robot, MoveDict[m])
+    
+    sum = 0
+    for r in range(1, len(_map)):
+        for c in range(1, len(_map[0])):
+            if _map[r][c] == "[":
+                sum += calcCoord((r, c))
+    return sum
 
 def getAnswer(input, isSample) -> list:
     input = input.replace("\r", "").split("\n\n")
@@ -119,8 +155,8 @@ def getAnswer(input, isSample) -> list:
     m = input[0].split("\n")
     moves = input[1].replace("\n", "")
 
-    answer[0] = getPart1(m, moves)
-    answer[1] = getPart2()
+    #answer[0] = getPart1(m, moves)
+    answer[1] = getPart2(input[0].split("\n"), moves)
     return answer
 
 while(True):
