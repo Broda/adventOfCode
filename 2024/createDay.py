@@ -14,5 +14,13 @@ def writeFile(path, s):
     f.write(s)
     f.close()
 
-num = input("Day #: ")
-copyFile(num)
+def padNum(num : int) -> str:
+    temp = str(num)
+    if len(temp) < 2:
+        temp = f"0{temp}"
+    return temp
+
+num = int(input("Day Start #: "))
+num2 = int(input("Day End #: "))
+for i in range(num, num2+1):
+    copyFile(padNum(i))
