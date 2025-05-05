@@ -45,15 +45,17 @@ class Computer:
     def __init__(self):
         self.registers = {'a':0, 'b':0, 'c':0, 'd':0}
         self.pointer : int = 0
-        self.cmds = {'cpy': self.cpy, 'inc': self.inc, 'dec': self.dec, 'jnz': self.jnz}
+        self.cmds = {'cpy': self.cpy, 'inc': self.inc, 'dec': self.dec, 'jnz': self.jnz, 'tgl': self.tgl}
+        self.program = []
 
     def runProgram(self, prog : list) -> None:
+        self.program = prog.copy()
         self.pointer = 0
         self.cmdCnt = 0
         while True:
-            if self.pointer >= len(prog): break
+            if self.pointer >= len(self.program): break
 
-            self.exec(prog[self.pointer])
+            self.exec(self.program[self.pointer])
 
     def exec(self, cmd : str) -> None:
         sCmd = cmd.split(" ")
@@ -69,8 +71,9 @@ class Computer:
             return self.registers[x]
         
     def cpy(self, x : str, y : str) -> None:
-        self.registers[y] = self.getRegVal(x)
         self.pointer += 1
+        if y not in self.registers: return
+        self.registers[y] = self.getRegVal(x)
 
     def inc(self, x : str) -> None:
         self.registers[x] += 1
@@ -87,19 +90,41 @@ class Computer:
         
         self.pointer += self.getRegVal(y)
 
-def getPart1() -> int:
-    return 0
+    def tgl(self, x : str) -> None:
+        cmdIndex : int = self.pointer + self.getRegVal(x)
+        self.pointer += 1
+        if cmdIndex < 0 or cmdIndex >= len(self.program): return
+        
+        awayCmdSplit : list = self.program[cmdIndex].split(" ")
+        match awayCmdSplit[0]:
+            case "inc":
+                self.program[cmdIndex] = self.program[cmdIndex].replace("inc ", "dec ")
+            case "jnz":
+                self.program[cmdIndex] = self.program[cmdIndex].replace("jnz ", "cpy ")
+            case _:
+                if len(awayCmdSplit) > 2:
+                    self.program[cmdIndex] = f"jnz {awayCmdSplit[1]} {awayCmdSplit[2]}"
+                else:
+                    self.program[cmdIndex] = f"inc {awayCmdSplit[1]}"     
+                    
 
-def getPart2() -> int:
-    return 0
+def getPart1(input : list, initA : int) -> int:
+    c : Computer = Computer()
+    c.registers["a"] = initA
+    print(f"registers: {c.registers}")
+    c.runProgram(input)
+
+    return c.registers["a"]
+
+def getPart2(input : list, initA : int) -> int:
+    return getPart1(input, initA)
 
 def getAnswer(input, isSample) -> list:
     input = input.replace("\r", "").split("\n")
     answer = [0,0] #part1, part2
 
-
-    answer[0] = getPart1()
-    answer[1] = getPart2()
+    answer[0] = getPart1(input, 7)
+    answer[1] = getPart2(input, 12)
     return answer
 
 while(True):
