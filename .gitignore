@@ -2,3 +2,5 @@
 .DS_Store
 /.vs
 /.vs/slnx.sqlite
+2025/__pycache__/day09.cpython-312.pyc
+*.pyc
